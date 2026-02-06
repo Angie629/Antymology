@@ -1,0 +1,19 @@
+Sam osweiler - CPSC 565 L01 - (Winter 2026) - Emergent Computing - Announcements Copy: A3 tidbits
+Posted Thursday, February 5, 2026 6:07 PM MST
+Hello, 
+I have compiled some things of note about how A3 handles its world to hopefully help some of you out.
+
+When you first open the project Unity will complain that it is an old version. Select the Unity version 6000.* and unity will upgrade the project to the latest version. In testing I did not notice any issues with the upgrade however please do this step ASAP and let me know if there are issues so I can work to get a fix (likely I'll upload a 6000.* version to D2L or something).
+
+No matter where you position the 'WorldManager' you will notice everything still generates in the exact same position. This is because the WorldManager makes 'chunks' representing a region of voxels (kinda like MineCraft). These chunks are NOT children of the worldManager but rather their own container in the hierarchy 'chuncks'.
+
+This has a useful feature in the base implementation where the block at [0,0,0] in the voxel space corresponds to [0,0,0] centred in world space (create a cube at [0,0,0] to see)! Therefore the coordinates are the same! If you are doing any raycasts or anything though make sure to subtract and floor 1/2 the normal otherwise you may affect the wrong block (See UITerrainEditor "SetBlockAt" for example). In a tutorial I mentioned that I made a modification that allowed multiple worlds to run in parallel, if you do this as well make sure to consider how to handle positioning, one way would be to make ants children of the WorldController so their coordinates are relative to the WorldController not the scene origin.
+
+In the WorldManager functions of note are the 'GetBlock', 'SetBlock' and 'GenerateAnts'. GenerateAnts is something you should implment to place your ants in the world (although you do not need to conform to this if you don't want to, just remove the function). 
+
+For your UI when you make text it may look blocky/low res. We are looking for UI functionality not looks
+
+Also camera pan is middle mouse button + drag. You can change this by modifying the fly camera script at ~line 32 to a key for easier laptop use. 
+
+Best
+Sam
