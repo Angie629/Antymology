@@ -11,7 +11,8 @@ Antymology is a voxel-based simulation where a colony of ants evolves simple beh
 ### Video
 
 ![Speed run demo (GIF)](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.gif)
-Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.mp4)
+Try Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.mp4)
+OR Video link: [Assignment 3 Demo (SharePoint)](https://uofc-my.sharepoint.com/:v:/g/personal/jeonghee_shin_ucalgary_ca/IQDrwkdYDp1AT6xp8MQg0cvbASTsYPuoud9gHx8Q_YfjTyE?e=RqTqRy)
 
 > **Note:**
 >
