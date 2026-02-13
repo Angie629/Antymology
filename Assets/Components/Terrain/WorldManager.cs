@@ -1,4 +1,5 @@
 ﻿using Antymology.Helpers;
+using Antymology.Agents;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,6 +31,11 @@ namespace Antymology.Terrain
         /// Reference to the geometry data of the chunks.
         /// </summary>
         private Chunk[,,] Chunks;
+
+        /// <summary>
+        /// Tracks total nest blocks placed.
+        /// </summary>
+        public int NestBlockCount { get; private set; }
 
         /// <summary>
         /// Random number generator.
@@ -80,6 +86,18 @@ namespace Antymology.Terrain
             Camera.main.transform.position = new Vector3(0 / 2, Blocks.GetLength(1), 0);
             Camera.main.transform.LookAt(new Vector3(Blocks.GetLength(0), 0, Blocks.GetLength(2)));
 
+            if (antPrefab == null)
+            {
+                antPrefab = Resources.Load<GameObject>("AntPrefab");
+            }
+
+            // Re-add AutoUIBootstrapper to ensure UI is created automatically
+            if (GameObject.FindObjectOfType<Antymology.UI.AutoUIBootstrapper>() == null)
+            {
+                var uiBootstrapperObj = new GameObject("AutoUIBootstrapper");
+                uiBootstrapperObj.AddComponent<Antymology.UI.AutoUIBootstrapper>();
+            }
+
             GenerateAnts();
         }
 
@@ -88,7 +106,9 @@ namespace Antymology.Terrain
         /// </summary>
         private void GenerateAnts()
         {
-            throw new NotImplementedException();
+            GameObject controllerObject = new GameObject("AntSimulation");
+            AntSimulationController controller = controllerObject.AddComponent<AntSimulationController>();
+            controller.Initialize(this);
         }
 
         #endregion
@@ -121,29 +141,10 @@ namespace Antymology.Terrain
             int ChunkXCoordinate, int ChunkYCoordinate, int ChunkZCoordinate,
             int LocalXCoordinate, int LocalYCoordinate, int LocalZCoordinate)
         {
-            if
-            (
-                LocalXCoordinate < 0 ||
-                LocalYCoordinate < 0 ||
-                LocalZCoordinate < 0 ||
-                LocalXCoordinate >= Blocks.GetLength(0) ||
-                LocalYCoordinate >= Blocks.GetLength(1) ||
-                LocalZCoordinate >= Blocks.GetLength(2) ||
-                ChunkXCoordinate < 0 ||
-                ChunkYCoordinate < 0 ||
-                ChunkZCoordinate < 0 ||
-                ChunkXCoordinate >= Blocks.GetLength(0) ||
-                ChunkYCoordinate >= Blocks.GetLength(1) ||
-                ChunkZCoordinate >= Blocks.GetLength(2) 
-            )
-                return new AirBlock();
-
-            return Blocks
-            [
-                ChunkXCoordinate * LocalXCoordinate,
-                ChunkYCoordinate * LocalYCoordinate,
-                ChunkZCoordinate * LocalZCoordinate
-            ];
+            int WorldX = (ChunkXCoordinate * ConfigurationManager.Instance.Chunk_Diameter) + LocalXCoordinate;
+            int WorldY = (ChunkYCoordinate * ConfigurationManager.Instance.Chunk_Diameter) + LocalYCoordinate;
+            int WorldZ = (ChunkZCoordinate * ConfigurationManager.Instance.Chunk_Diameter) + LocalZCoordinate;
+            return GetBlock(WorldX, WorldY, WorldZ);
         }
 
         /// <summary>
@@ -156,9 +157,9 @@ namespace Antymology.Terrain
                 WorldXCoordinate < 0 ||
                 WorldYCoordinate < 0 ||
                 WorldZCoordinate < 0 ||
-                WorldXCoordinate > Blocks.GetLength(0) ||
-                WorldYCoordinate > Blocks.GetLength(1) ||
-                WorldZCoordinate > Blocks.GetLength(2)
+                WorldXCoordinate >= Blocks.GetLength(0) ||
+                WorldYCoordinate >= Blocks.GetLength(1) ||
+                WorldZCoordinate >= Blocks.GetLength(2)
             )
             {
                 Debug.Log("Attempted to set a block which didn't exist");
@@ -183,38 +184,10 @@ namespace Antymology.Terrain
             int LocalXCoordinate, int LocalYCoordinate, int LocalZCoordinate,
             AbstractBlock toSet)
         {
-            if
-            (
-                LocalXCoordinate < 0 ||
-                LocalYCoordinate < 0 ||
-                LocalZCoordinate < 0 ||
-                LocalXCoordinate > Blocks.GetLength(0) ||
-                LocalYCoordinate > Blocks.GetLength(1) ||
-                LocalZCoordinate > Blocks.GetLength(2) ||
-                ChunkXCoordinate < 0 ||
-                ChunkYCoordinate < 0 ||
-                ChunkZCoordinate < 0 ||
-                ChunkXCoordinate > Blocks.GetLength(0) ||
-                ChunkYCoordinate > Blocks.GetLength(1) ||
-                ChunkZCoordinate > Blocks.GetLength(2)
-            )
-            {
-                Debug.Log("Attempted to set a block which didn't exist");
-                return;
-            }
-            Blocks
-            [
-                ChunkXCoordinate * LocalXCoordinate,
-                ChunkYCoordinate * LocalYCoordinate,
-                ChunkZCoordinate * LocalZCoordinate
-            ] = toSet;
-
-            SetChunkContainingBlockToUpdate
-            (
-                ChunkXCoordinate * LocalXCoordinate,
-                ChunkYCoordinate * LocalYCoordinate,
-                ChunkZCoordinate * LocalZCoordinate
-            );
+            int WorldX = (ChunkXCoordinate * ConfigurationManager.Instance.Chunk_Diameter) + LocalXCoordinate;
+            int WorldY = (ChunkYCoordinate * ConfigurationManager.Instance.Chunk_Diameter) + LocalYCoordinate;
+            int WorldZ = (ChunkZCoordinate * ConfigurationManager.Instance.Chunk_Diameter) + LocalZCoordinate;
+            SetBlock(WorldX, WorldY, WorldZ, toSet);
         }
 
         #endregion
@@ -395,8 +368,88 @@ namespace Antymology.Terrain
 
             if (updateZ - 1 >= 0)
                 Chunks[updateX, updateY, updateZ - 1].updateNeeded = true;
-            if (updateX + 1 < Chunks.GetLength(2))
+            if (updateZ + 1 < Chunks.GetLength(2))
                 Chunks[updateX, updateY, updateZ + 1].updateNeeded = true;
+        }
+
+        #endregion
+
+        #region Public API
+
+        public int WorldSizeX => Blocks.GetLength(0);
+        public int WorldSizeY => Blocks.GetLength(1);
+        public int WorldSizeZ => Blocks.GetLength(2);
+
+        public void RegisterNestBlock()
+        {
+            NestBlockCount += 1;
+        }
+
+        public void ResetNestBlockCount()
+        {
+            NestBlockCount = 0;
+        }
+
+        public void RegenerateWorld()
+        {
+            RNG = new System.Random(ConfigurationManager.Instance.Seed);
+            SimplexNoise = new SimplexNoise(ConfigurationManager.Instance.Seed);
+            GenerateData();
+            ResetNestBlockCount();
+
+            for (int x = 0; x < Chunks.GetLength(0); x++)
+                for (int y = 0; y < Chunks.GetLength(1); y++)
+                    for (int z = 0; z < Chunks.GetLength(2); z++)
+                        Chunks[x, y, z].updateNeeded = true;
+        }
+
+        public float GetFoodPheromone(Vector3Int position)
+        {
+            AbstractBlock block = GetBlock(position.x, position.y, position.z);
+            if (block is AirBlock air)
+            {
+                return air.GetFoodPheromone();
+            }
+
+            return 0f;
+        }
+
+        public float GetNestPheromone(Vector3Int position)
+        {
+            AbstractBlock block = GetBlock(position.x, position.y, position.z);
+            if (block is AirBlock air)
+            {
+                return air.GetNestPheromone();
+            }
+
+            return 0f;
+        }
+
+        public void DepositFoodPheromone(Vector3Int position)
+        {
+            AbstractBlock block = GetBlock(position.x, position.y, position.z);
+            if (block is AirBlock air)
+            {
+                air.AddFoodPheromone(ConfigurationManager.Instance.PheromoneDeposit, ConfigurationManager.Instance.PheromoneMax);
+            }
+        }
+
+        public void DepositNestPheromone(Vector3Int position)
+        {
+            AbstractBlock block = GetBlock(position.x, position.y, position.z);
+            if (block is AirBlock air)
+            {
+                air.AddNestPheromone(ConfigurationManager.Instance.PheromoneDeposit, ConfigurationManager.Instance.PheromoneMax);
+            }
+        }
+
+        public void DecayPheromone(Vector3Int position)
+        {
+            AbstractBlock block = GetBlock(position.x, position.y, position.z);
+            if (block is AirBlock air)
+            {
+                air.Decay(ConfigurationManager.Instance.PheromoneDecay);
+            }
         }
 
         #endregion
