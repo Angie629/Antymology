@@ -48,16 +48,18 @@ You can visualize simulation metrics (health, fitness, nest blocks, etc.) in rea
 
 - In a terminal, run one of the following commands (replace `<YourUsername>` with your Windows username):
 
-**Option A: Full paths (run from anywhere)**
+**Option A: Stream a specific run folder**
 
 ```bash
-python "tools/tensorboard_log.py" --metrics-dir "C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs" --follow
+python "tools/tensorboard_log.py" --metrics-dir "C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics\run_YYYYMMDD_HHMMSS" --logdir "tb_logs/<run-name>" --follow
 ```
 
-**Option B: Run from the project root with a named run**
+You can name `<run-name>` anything you like (e.g., run1, run2, experimentA).
+
+**Option B: Stream all runs**
 
 ```bash
-python tools/tensorboard_log.py --metrics-dir "C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs/run_final" --follow
+python tools/tensorboard_log.py --metrics-dir "C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs/<run-name>" --follow
 ```
 
 3. **Launch TensorBoard**
@@ -145,11 +147,11 @@ These parameters control world size, ant health, evolutionary algorithm, pheromo
 
 ### Diffusion Results (Pheromone Diffusion)
 
-![Diffusion nest blocks per generation](Images/Results/diffusion_nest_blocks_per_gen.png)
-![Diffusion best fitness per generation](Images/Results/diffusion_fitness_best.png)
-![Diffusion average fitness per generation](Images/Results/diffusion_fitness_avg.png)
-![Diffusion mulch consumed](Images/Results/diffusion_mulch_consumed.png)
-![Diffusion alive count](Images/Results/diffusion_alive_count.png)
+> ![Diffusion nest blocks per generation](Images/Results/diffusion_nest_blocks_per_gen.png)
+> ![Diffusion best fitness per generation](Images/Results/diffusion_fitness_best.png)
+> ![Diffusion average fitness per generation](Images/Results/diffusion_fitness_avg.png)
+> ![Diffusion mulch consumed](Images/Results/diffusion_mulch_consumed.png)
+> ![Diffusion alive count](Images/Results/diffusion_alive_count.png)
 
 ### Diffusion Analysis
 
@@ -159,16 +161,6 @@ These parameters control world size, ant health, evolutionary algorithm, pheromo
 - `run_new` refers to results from the simulation **with** the diffusion logic implemented.
 
 After adding pheromone diffusion logic (`run_new`), the fitness level increased more rapidly and mulch consumption also rose. However, this change did not significantly impact the number of nest blocks per generation. This is likely due to the randomness of the queen's spawn location—if the queen is placed on an acidic or container block, she may die quickly, limiting nest block growth regardless of improved worker behavior.
-
-#### Visual Evidence
-
-See new images in [Images/Results](Images/Results) starting with `diffusion_` for visualizations of diffusion effects and their impact on colony performance.
-
-### Portfolio Evidence
-
-- The gif above demonstrates the running simulation.
-- Results screenshots and video are in Assets/Results (see the Results section).
-- Verify images on a different computer to ensure paths are correct.
 
 ## Technical Details
 
