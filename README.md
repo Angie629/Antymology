@@ -13,6 +13,19 @@ Antymology is a voxel-based simulation where a colony of ants evolves simple beh
 ![Speed run demo (GIF)](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.gif)
 Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.mp4)
 
+> **Note:**
+>
+> - **Ants:**
+>   - The **queen ant** is larger and colored purple.
+>   - **Worker ants** are smaller and colored yellow.
+> - **Block types (by color):**
+>   - **Acidic block:** Bright green
+>   - **Container block:** Blue
+>   - **Mulch block:** Brown
+>   - **Nest block:** Orange
+>   - **Stone block:** Gray
+>   - **Grass block:** Green
+
 ## Getting Started
 
 ### How To Run
@@ -47,23 +60,52 @@ Each worker ant has a weighted genome that biases movement, digging, consuming, 
 
 ## Configuration
 
-Tune the simulation in [Assets/Components/Configuration/ConfigurationManager.cs](Assets/Components/Configuration/ConfigurationManager.cs):
+The simulation is tuned using parameters in [Assets/Components/Configuration/ConfigurationManager.cs](Assets/Components/Configuration/ConfigurationManager.cs). Here are the current key settings and what they mean:
 
-- `WorkerCount`, `WorkerMaxHealth`, `QueenMaxHealth`
-- `HealthDrainPerTick`, `MulchHealthGain`, `TickInterval`, `EvaluationDuration`
-- `EliteCount`, `MutationRate`, `MutationMagnitude`
-- `PheromoneDeposit`, `PheromoneDecay`, `PheromoneBias`
+| Parameter                     | Value | Meaning                                    |
+| ----------------------------- | ----- | ------------------------------------------ |
+| `Seed`                        | 1337  | World generation seed (randomness control) |
+| `World_Diameter`              | 16    | Number of chunks in X/Z (world size)       |
+| `World_Height`                | 4     | Number of chunks in Y (vertical size)      |
+| `Chunk_Diameter`              | 8     | Blocks per chunk edge                      |
+| `Number_Of_Acidic_Regions`    | 10    | Acidic region count (hazardous areas)      |
+| `Acidic_Region_Radius`        | 5     | Acidic region size                         |
+| `Number_Of_Conatiner_Spheres` | 5     | Container region count (blue blocks)       |
+| `Conatiner_Sphere_Radius`     | 20    | Container region size                      |
+| `WorkerCount`                 | 30    | Number of worker ants per generation       |
+| `WorkerMaxHealth`             | 40    | Max health for workers                     |
+| `QueenMaxHealth`              | 120   | Max health for queen                       |
+| `HealthDrainPerTick`          | 0.4   | Health lost per tick                       |
+| `MulchHealthGain`             | 15    | Health gained from mulch                   |
+| `TickInterval`                | 0.25  | Seconds per simulation tick                |
+| `EvaluationDuration`          | 60    | Seconds per generation                     |
+| `EliteCount`                  | 12    | Number of elite genomes kept               |
+| `MutationRate`                | 0.15  | Probability of genome mutation             |
+| `MutationMagnitude`           | 0.4   | Max mutation change per gene               |
+| `HealthShareAmount`           | 2     | Health shared per tick (if ants overlap)   |
+| `MulchFitnessBonus`           | 2     | Fitness bonus per mulch consumed           |
+| `NestFitnessBonus`            | 12    | Fitness bonus per nest block built         |
+| `PheromoneDeposit`            | 0.2   | Pheromone deposited per tick               |
+| `PheromoneMax`                | 2.5   | Max pheromone per cell                     |
+| `PheromoneDecay`              | 0.05  | Pheromone lost per tick                    |
+| `PheromoneBias`               | 1.2   | Strength of pheromone influence            |
+| `GraphHistoryLength`          | 50    | HUD graph history length                   |
+| `EnableCsvMetrics`            | true  | Write metrics for TensorBoard              |
+| `MetricsSampleInterval`       | 1     | How often to log metrics (ticks)           |
+
+These parameters control world size, ant health, evolutionary algorithm, pheromone logic, and logging. Adjusting them changes the simulation's difficulty, evolutionary pressure, and how ants interact with the environment.
 
 ## Results & Analysis
 
 ### Graphs (TensorBoard Exports)
 
-![Nest blocks per generation (smoothed 0.7)](Images/Results/nest_blocks_per_gen.png)
-![Best fitness per generation](Images/Results/fitness_best.png)
-![Average fitness per generation](Images/Results/fitness_avg.png)
-![Queen health](Images/Results/health_queen.png)
-![Mulch consumed](Images/Results/mulch_consumed.png)
-![Average worker health](Images/Results/avg_worker.png)
+> **Note:** In the graph below, `run_final` shows results **without** diffusion logic, and `run_new` shows results **with** diffusion logic implemented.
+> ![Nest blocks per generation (smoothed 0.7)](Images/Results/nest_blocks_per_gen.png)
+> ![Best fitness per generation](Images/Results/fitness_best.png)
+> ![Average fitness per generation](Images/Results/fitness_avg.png)
+> ![Queen health](Images/Results/health_queen.png)
+> ![Mulch consumed](Images/Results/mulch_consumed.png)
+> ![Average worker health](Images/Results/avg_worker.png)
 
 ### Diffusion Results (Pheromone Diffusion)
 
@@ -75,7 +117,12 @@ Tune the simulation in [Assets/Components/Configuration/ConfigurationManager.cs]
 
 ### Diffusion Analysis
 
-After adding pheromone diffusion logic, the fitness level increased more rapidly and mulch consumption also rose. However, this change did not significantly impact the number of nest blocks per generation. This is likely due to the randomness of the queen's spawn location—if the queen is placed on an acidic or container block, she may die quickly, limiting nest block growth regardless of improved worker behavior.
+**Clarification:**
+
+- `run_final` refers to results from the simulation **without** the diffusion logic implemented.
+- `run_new` refers to results from the simulation **with** the diffusion logic implemented.
+
+After adding pheromone diffusion logic (`run_new`), the fitness level increased more rapidly and mulch consumption also rose. However, this change did not significantly impact the number of nest blocks per generation. This is likely due to the randomness of the queen's spawn location—if the queen is placed on an acidic or container block, she may die quickly, limiting nest block growth regardless of improved worker behavior.
 
 #### Visual Evidence
 
@@ -190,6 +237,7 @@ The logging and streaming workflow is tightly integrated with the technical syst
 
 3. **Launch TensorBoard**
    - In another terminal:
+
    ```bash
    tensorboard --logdir "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tb_logs"
    ```
