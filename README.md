@@ -1,71 +1,204 @@
-# Assignment 3: Antymology
+# Antymology: Evolutionary Ant Colony
 
-As we\'ve seen in class, ants exhibit very interesting behaviour. From finding the shortest path to building bridges out of bodies ants have evolved to produce complex emergents from very simple rules. For your assignment you will need to create a species of ant which is capable of generating the biggest nest possible.
+## Project Overview
 
-I have already created the base code you will use for the assignment. Currently the simulation environment is devoid of any dynamic behaviour and exists only as a landscape. You will need to extend the functionality of what I have written in order to produce \"intelligent\" behaviour. Absolutely no behaviour has been added to this project so you are free to implement whatever you want however you want, with only a few stipulations.
+Antymology is a voxel-based simulation where a colony of ants evolves simple behaviors to build the largest nest possible. The world is procedurally generated, ants must obey terrain and health constraints, and a singular queen converts her health into nest blocks. Each generation evaluates performance and breeds a new population with mutation, creating visible improvement over time.
+
+## Demo Media
 
 ![Ants](Images/Ants.gif)
 
-## Goal
+### Video
 
-The only goal you have is to implement some sort of evolutionary algorithm which maximises nest production. You are in complete control over how your ants breed, make choices, and interact with the environment. Because of this, your mark is primarily going to be reflective of how much effort it looks like you put into this vs. how well your agents maximise their fitness (I.e. don\'t worry about having your ants perform exceptionally well).
+![Speed run demo (GIF)](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.gif)
+Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images/Results/Speed%20Run%20Video%20of%20Assignment%203.mp4)
 
-## Current Code
-My code is currently broken into 4 components (found within the components folder)
-1. Agents
-2. Configuration
-3. Terrain
-4. UI
+## Getting Started
 
-You are able to experience it generating an environment by simply running the project once you have loaded it into unity.
+### How To Run
 
-### Agents
-The agents component is currently empty. This is where you will place most of your code. The component will be responsible for moving ants, digging, making nests, etc. You will need to come up with a system for how ants interact within the world, as well as how you will be maximising their fitness (see ant behaviour).
+1. Open the project in Unity 6000.3.\* and load SampleScene.
+2. Press Play.
+3. Watch the HUD for generation, time remaining, living ants, and nest blocks.
 
-### Configuration
-This is the component responsible for configuring the system. For example, currently there exists a file called ConfigurationManager which holds the values responsible for world generation such as the dimensions of the world, and the seed used in the RNG. As you build parameters into your system, you will need to place your necesarry configuration components in here.
+### Controls
 
-### Terrain
-The terrain memory, generation, and display all take place in the terrain component. The main WorldManager is responsible for generating everything.
+- Fly camera: `WASD` to move, `Q/E` to move vertically.
+- Rotate camera: middle mouse button + drag.
 
-### UI
-This is where all UI components will go. Currently only a fly camera, and a camera-controlled map editor are present here.
+## Ant Behavior & Rules
 
-## Requirements
+- Health decreases every tick; ants die at 0 health and are removed.
+- Mulch is consumed only when an ant is directly above it, and only if no other ant shares the cell.
+- Ants may dig the block below them (never container blocks) and move into the dug space.
+- Movement is limited to a maximum height difference of 2 between positions.
+- Acidic blocks double the health drain rate.
+- Ants may share health with another ant in the same cell (zero-sum transfer).
+- A single queen builds nest blocks at the cost of 1/3 her max health.
 
-### Admin
- - This assignment must be implemented using Unity 2019or above (see appendix)
- - Your code must be maintained in a github (or other similar git environment) repository.
- - You must fork from this repo to start your project.
- - You will be marked for your commit messages as well as the frequency with which you commit. Committing everything at once will receive a letter grade reduction (A →A-).
- - All project documentation should be provided via a Readme.md file found in your repo. Write it as if I was an employer who wanted to see a portfolio of your work. By that I mean write it as if I have no idea what the project is. Describe it in detail. Include images/gifs.
+### Evolutionary Algorithm
 
-### Interface
-- The camera must be usable in play-mode so as to allow the grader the ability to look at what is happening in the scene.
-- You must create a basic UI which shows the current number of nest blocks in the world
+Each worker ant has a weighted genome that biases movement, digging, consuming, and sharing. At the end of each generation:
 
-### Ant Behaviour
-- Ants must have some measure of health. When an ants health hits 0, it dies and needs to be removed from the simulation
-- Every timestep, you must reduce each ants health by some fixed amount
-- Ants can refill their health by consuming Mulch blocks. To consume a mulch block, and ant must be directly ontop of a mulch block. After consuming, the mulch block must be removed from the world.
-- Ants cannot consume mulch if another ant is also on the same mulch block
-- When moving from one black to another, ants are not allowed to move to a block that is greater than 2 units in height difference
-- Ants are able to dig up parts of the world. To dig up some of the world, an ant must be directly ontop of the block. After digging, the block is removed from the map
-- Ants cannot dig up a block of type ContainerBlock
-- Ants standing on an AcidicBlock will have the rate at which their health decreases multiplied by 2.
-- Ants may give some of their health to other ants occupying the same space (must be a zero-sum exchange)
-- Among your ants must exists a singular queen ant who is responsible for producing nest blocks
-- Producing a single nest block must cost the queen 1/3rd of her maximum health.
-- No new ants can be created during each evaluation phase (you are allowed to create as many ants as you need for each new generation though).
+1. Workers are ranked by fitness (health + mulch consumed).
+2. The top performers are kept as elites.
+3. New genomes are created by crossover and mutation.
+   This creates simple but observable evolutionary improvement without hand-authored behavior scripts.
 
-## Tips
-Initially you should first come up with some mechanism which each ant uses to interact with the environment. For the beginning phases your ants should behave completely randomly, at least until you have gotten it so that your ants don't break the pre-defined behaviour above.
+## Configuration
 
-Once you have the interaction mechanism nailed down, begin thinking about how you will get your ants to change over time. One approach might be to use a neural network to dictate ant behaviour
+Tune the simulation in [Assets/Components/Configuration/ConfigurationManager.cs](Assets/Components/Configuration/ConfigurationManager.cs):
 
-https://youtu.be/zIkBYwdkuTk
+- `WorkerCount`, `WorkerMaxHealth`, `QueenMaxHealth`
+- `HealthDrainPerTick`, `MulchHealthGain`, `TickInterval`, `EvaluationDuration`
+- `EliteCount`, `MutationRate`, `MutationMagnitude`
+- `PheromoneDeposit`, `PheromoneDecay`, `PheromoneBias`
 
-another approach might be to use phermone deposits (I\'ve commented how you could achieve this in the code for the AirBlock) and have your genes be what action should be taken for different phermone concentrations, etc.
+## Results & Analysis
 
-## Submission
-Export your project as a Unity package file. Submit your Unity package file and additional document using the D2L system under the corresponding entry in Assessments/Dropbox. Inlude in the message a link to your git repo where you did your work.
+### Graphs (TensorBoard Exports)
+
+![Nest blocks per generation (smoothed 0.7)](Images/Results/nest_blocks_per_gen.png)
+![Best fitness per generation](Images/Results/fitness_best.png)
+![Average fitness per generation](Images/Results/fitness_avg.png)
+![Queen health](Images/Results/health_queen.png)
+![Mulch consumed](Images/Results/mulch_consumed.png)
+![Average worker health](Images/Results/avg_worker.png)
+
+### Diffusion Results (Pheromone Diffusion)
+
+![Diffusion nest blocks per generation](Images/Results/diffusion_nest_blocks_per_gen.png)
+![Diffusion best fitness per generation](Images/Results/diffusion_fitness_best.png)
+![Diffusion average fitness per generation](Images/Results/diffusion_fitness_avg.png)
+![Diffusion mulch consumed](Images/Results/diffusion_mulch_consumed.png)
+![Diffusion alive count](Images/Results/diffusion_alive_count.png)
+
+### Diffusion Analysis
+
+After adding pheromone diffusion logic, the fitness level increased more rapidly and mulch consumption also rose. However, this change did not significantly impact the number of nest blocks per generation. This is likely due to the randomness of the queen's spawn location—if the queen is placed on an acidic or container block, she may die quickly, limiting nest block growth regardless of improved worker behavior.
+
+#### Visual Evidence
+
+See new images in [Images/Results](Images/Results) starting with `diffusion_` for visualizations of diffusion effects and their impact on colony performance.
+
+### Portfolio Evidence
+
+- The gif above demonstrates the running simulation.
+- Results screenshots and video are in Assets/Results (see the Results section).
+- Verify images on a different computer to ensure paths are correct.
+
+## Technical Details
+
+### Fitness Calculation
+
+Fitness is used to rank ants at the end of each generation. For workers, fitness is:
+fitness = health + (mulch consumed × 2)
+For the queen, fitness is:
+fitness = health + (mulch consumed × 2) + (nest built × 12)
+This incentivizes nest building and mulch consumption. The calculation is implemented in [AntAgent.cs](Assets/Components/Agents/AntAgent.cs#L302-L307) and [ConfigurationManager.cs](Assets/Components/Configuration/ConfigurationManager.cs#L109-L116).
+
+### Genome and Evolution
+
+Each worker ant has a genome consisting of weights for movement, digging, consuming, and sharing. These weights bias the ant's actions. At the end of each generation:
+
+- Ants are ranked by fitness.
+- The top N are kept as elites (no mutation).
+- The rest are generated by crossover (randomly mixing parent genomes) and mutation (randomly perturbing weights).
+  Mutation rate and magnitude are configurable in [ConfigurationManager.cs](Assets/Components/Configuration/ConfigurationManager.cs).
+
+### Movement and Pheromone Bias
+
+Ants choose their next move based on genome weights and local pheromone concentration. The movement weight is scaled:
+w' = w × (1 + p × 1.2)
+Where w is the genome weight, p is the pheromone value. Queens follow nest pheromone, workers follow food pheromone. See [AntAgent.cs](Assets/Components/Agents/AntAgent.cs#L245-L255).
+Movement is restricted to a max height difference of 2 between positions. Terrain constraints are checked in [CustomMath.cs](Assets/Helpers/CustomMath.cs).
+
+### Pheromone Logic and Diffusion
+
+Ants deposit pheromone each tick (up to 2.5 per cell). Air blocks decay pheromone by 0.05 per tick. Diffusion is implemented by blending each cell's pheromone with its neighbors, creating gradients ants can follow. This is handled in [AirBlock.cs](Assets/Components/Terrain/Blocks/AirBlock.cs#L81-L100).
+Pheromone types:
+
+- Food pheromone: guides workers to mulch.
+- Nest pheromone: guides queen to build nest blocks.
+
+### Health and Mulch
+
+Health drains every tick. Mulch restores health when consumed. Acidic blocks double the health drain rate. Mulch can only be consumed if no other ant shares the cell. Health transfer between ants is zero-sum and only possible if they share a cell.
+
+### Queen Logic
+
+There is only one queen per generation. She builds nest blocks at the cost of 1/3 her max health. If her health reaches zero, she dies and cannot build further. Queen logic is implemented in [AntAgent.cs](Assets/Components/Agents/AntAgent.cs).
+
+### Block Types and Colors
+
+Block types include stone, grass, mulch, acidic, nest, and container. Each type is mapped to a tilemap coordinate and color in the relevant block scripts:
+
+- [StoneBlock.cs](Assets/Components/Terrain/Blocks/StoneBlock.cs#L13-L31)
+- [GrassBlock.cs](Assets/Components/Terrain/Blocks/GrassBlock.cs#L13-L31)
+- [MulchBlock.cs](Assets/Components/Terrain/Blocks/MulchBlock.cs#L13-L31)
+- [AcidicBlock.cs](Assets/Components/Terrain/Blocks/AcidicBlock.cs#L13-L31)
+- [NestBlock.cs](Assets/Components/Terrain/Blocks/NestBlock.cs#L13-L31)
+- [ContainerBlock.cs](Assets/Components/Terrain/Blocks/ContainerBlock.cs#L10-L31)
+
+### Procedural Terrain Generation
+
+The world is generated procedurally using noise functions. Terrain generation and block placement are handled in [NoiseGenerator.cs](Assets/Helpers/NoiseGenerator.cs). Terrain constraints (height, block types) are enforced during ant movement and digging.
+
+### Simulation Timing and Evaluation
+
+Simulation runs in ticks, controlled by `TickInterval` and `EvaluationDuration` in [ConfigurationManager.cs](Assets/Components/Configuration/ConfigurationManager.cs). At the end of each evaluation, ants are ranked, and the next generation is bred.
+
+### Data Logging and TensorBoard
+
+Simulation metrics (health, fitness, nest blocks, etc.) are logged to CSV files. The helper script [tensorboard_log.py](tools/tensorboard_log.py) streams these metrics into TensorBoard for visualization. Metrics are written to per-run folders under the Unity persistent data path.
+
+### UI and Controls
+
+The HUD displays generation, time remaining, living ants, and nest blocks. Camera controls are implemented for fly and rotate modes. UI logic is handled in [UI](Assets/Components/UI).
+
+---
+
+## Data Logging & Visualization: TensorBoard Streaming
+
+To help analyze and visualize the simulation's performance and evolutionary progress, Antymology logs key metrics (such as health, fitness, and nest blocks) to CSV files during each run. These metrics can be streamed and visualized in TensorBoard, providing insight into how the colony evolves over time and how changes in configuration or logic affect outcomes.
+
+The logging and streaming workflow is tightly integrated with the technical systems described above. For example, fitness calculations, health changes, and nest block counts are all tracked and exported for review. This allows for both debugging and deeper analysis of the evolutionary algorithm and ant behaviors.
+
+### How to Stream Metrics into TensorBoard
+
+1. **Run the simulation**
+   - Start the Unity scene. Metrics are written to a per-run folder under the Unity persistent data path:
+     C:\Users\Angie\AppData\LocalLow\DefaultCompany\Antymology\metrics\run_YYYYMMDD_HHMMSS
+   - You should see:
+     - `health_metrics.csv`
+     - `generation_metrics.csv`
+
+2. **Stream metrics into TensorBoard**
+   - Choose one of the commands below:
+
+   **Option A: Full paths (run from anywhere)**
+
+   ```bash
+   python "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tools\tensorboard_log.py" --metrics-dir "C:\Users\Angie\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tb_logs" --follow
+   ```
+
+   **Option B: Run from the project root with a named run**
+
+   ```bash
+   python tools\tensorboard_log.py --metrics-dir "C:\Users\Angie\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs\run_final" --follow
+   ```
+
+3. **Launch TensorBoard**
+   - In another terminal:
+   ```bash
+   tensorboard --logdir "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tb_logs"
+   ```
+
+   - Then open: http://localhost:6006/
+
+#### Notes
+
+- If you run TensorBoard from the project root, you can use `tensorboard --logdir tb_logs` instead.
+- The metrics folder keeps a `latest.txt` pointer, so you can pass the root `metrics` folder and it will use the newest run automatically.
+- The run name shows as `.` when logs are written directly into the root logdir; using a subfolder (as in Option B) gives a nicer name.
+- Stop streaming with Ctrl+C.
