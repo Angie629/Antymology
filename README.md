@@ -135,6 +135,18 @@ These parameters control world size, ant health, evolutionary algorithm, pheromo
 
 ## Results & Analysis
 
+### Overall Graph Analysis
+
+As generations increase, the graphs show how the colony evolves and improves:
+
+- **Fitness Level:** Both best and average fitness usually go up over time. This happens because the evolutionary algorithm rewards ants for surviving and consuming mulch (`MulchFitnessBonus`) and building nest blocks (`NestFitnessBonus`). Mutation and crossover help ants discover better strategies each generation.
+- **Queen Nest Blocks:** The number of nest blocks built by the queen rises as workers get better at supporting her, but can flatten out if the queen spawns in a bad spot (like on an acidic or container block). The queen can only build as long as she has enough health (`QueenMaxHealth` and nest block cost).
+- **Alive Count:** More ants survive as generations go on, since their genomes adapt to avoid hazards and find food. If the environment is tough (lots of acidic/container blocks, high `HealthDrainPerTick`), alive count can drop.
+- **Mulch Consumed:** Mulch consumption increases as ants learn to find and eat mulch more efficiently, which boosts their health and fitness. This is affected by `MulchHealthGain` and how much fitness bonus mulch gives.
+- **Queen/Worker Health:** Health improves as ants evolve smarter movement and resource gathering. If the queen or workers spawn in hazardous areas, health can drop.
+
+These trends are shaped by the simulation's configuration parameters (see table above). Changing mutation rate, fitness bonuses, health drain, or world hazards will change how quickly and effectively the colony adapts.
+
 ### Graphs (TensorBoard Exports)
 
 > **Note:** In the graph below, `run_final` shows results **without** diffusion logic, and `run_new` shows results **with** diffusion logic implemented.
@@ -160,7 +172,7 @@ These parameters control world size, ant health, evolutionary algorithm, pheromo
 - `run_final` refers to results from the simulation **without** the diffusion logic implemented.
 - `run_new` refers to results from the simulation **with** the diffusion logic implemented.
 
-After adding pheromone diffusion logic (`run_new`), the fitness level increased more rapidly and mulch consumption also rose. However, this change did not significantly impact the number of nest blocks per generation. This is likely due to the randomness of the queen's spawn location—if the queen is placed on an acidic or container block, she may die quickly, limiting nest block growth regardless of improved worker behavior.
+After adding pheromone diffusion logic (`run_new`), the fitness level increased more rapidly and mulch consumption also rose. However, this change did not significantly impact the number of nest blocks per generation. This is likely due to the randomness of the queen's spawn location, if the queen is placed on an acidic or container block, she may die quickly, limiting nest block growth regardless of improved worker behavior.
 
 ## Technical Details
 
@@ -210,7 +222,7 @@ This project uses both block and ant colors to visually distinguish different el
 
 #### Block Colors
 
-Each block type—stone, grass, mulch, acidic, nest, and container—has its color defined by a specific tile in the texture atlas: [tilesheet.png](Assets/Resources/tilesheet.png).
+Each block type, stone, grass, mulch, acidic, nest, and container, has its color defined by a specific tile in the texture atlas: [tilesheet.png](Assets/Resources/tilesheet.png).
 
 **How it works:**
 
