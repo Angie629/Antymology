@@ -42,12 +42,12 @@ namespace Antymology.Terrain
         /// <summary>
         /// The Unity mesh renderer component of this chunk object.
         /// </summary>
-        MeshRenderer renderer;
+        MeshRenderer meshRenderer;
 
         /// <summary>
         /// The collider of this mesh
         /// </summary>
-        MeshCollider collider;
+        MeshCollider meshCollider;
 
         #endregion
 
@@ -59,9 +59,9 @@ namespace Antymology.Terrain
         public void Init(Material mat)
         {
             mesh = gameObject.AddComponent<MeshFilter>().mesh;
-            renderer = gameObject.AddComponent<MeshRenderer>();
-            renderer.material = mat;
-            collider = gameObject.AddComponent<MeshCollider>();
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            meshRenderer.material = mat;
+            meshCollider = gameObject.AddComponent<MeshCollider>();
         }
 
         /// <summary>
@@ -123,7 +123,14 @@ namespace Antymology.Terrain
             // Optimize, and normal calculation
             MeshUtility.Optimize(mesh);
             mesh.RecalculateNormals();
-            collider.sharedMesh = mesh;
+            if (vertices.Count > 0)
+            {
+                meshCollider.sharedMesh = mesh;
+            }
+            else
+            {
+                meshCollider.sharedMesh = null;
+            }
         }
 
         #endregion
