@@ -91,7 +91,7 @@ namespace Antymology.Terrain
                 antPrefab = Resources.Load<GameObject>("AntPrefab");
             }
 
-            // Re-add AutoUIBootstrapper to ensure UI is created automatically
+            // AutoUIBootstrapper to ensure UI is created automatically
             if (GameObject.FindObjectOfType<Antymology.UI.AutoUIBootstrapper>() == null)
             {
                 var uiBootstrapperObj = new GameObject("AutoUIBootstrapper");

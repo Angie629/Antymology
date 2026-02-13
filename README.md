@@ -16,15 +16,15 @@ Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images
 > **Note:**
 >
 > - **Ants:**
->   - The **queen ant** is larger and colored purple.
->   - **Worker ants** are smaller and colored yellow.
+>   - The **queen ant** is colored yellow.
+>   - **Worker ants** are colored brownish orange.
 > - **Block types (by color):**
->   - **Acidic block:** Bright green
->   - **Container block:** Blue
->   - **Mulch block:** Brown
->   - **Nest block:** Orange
->   - **Stone block:** Gray
->   - **Grass block:** Green
+>   - **Acidic block:** Purple
+>   - **Mulch block:** Dark green
+>   - **Nest block:** Red
+>   - **Stone block:** Medium light grey
+>   - **Container block:**: Light grey
+>   - **Grass block:** Light Green
 
 ## Getting Started
 
@@ -176,9 +176,21 @@ Health drains every tick. Mulch restores health when consumed. Acidic blocks dou
 
 There is only one queen per generation. She builds nest blocks at the cost of 1/3 her max health. If her health reaches zero, she dies and cannot build further. Queen logic is implemented in [AntAgent.cs](Assets/Components/Agents/AntAgent.cs).
 
-### Block Types and Colors
+### Block and Ant Colors
 
-Block types include stone, grass, mulch, acidic, nest, and container. Each type is mapped to a tilemap coordinate and color in the relevant block scripts:
+This project uses both block and ant colors to visually distinguish different elements in the simulation.
+
+#### Block Colors
+
+Each block type—stone, grass, mulch, acidic, nest, and container—has its color defined by a specific tile in the texture atlas: [tilesheet.png](Assets/Resources/tilesheet.png).
+
+**How it works:**
+
+- Each block script (see links below) assigns a `tileMapCoordinate` to the block type.
+- When rendering the world, the mesh UVs are set to sample the correct tile from the atlas based on this coordinate (see [Chunk.cs](Assets/Components/Terrain/Chunk.cs)).
+- The actual color you see in-game comes from the artwork in `tilesheet.png`, not from code.
+
+Relevant block scripts:
 
 - [StoneBlock.cs](Assets/Components/Terrain/Blocks/StoneBlock.cs#L13-L31)
 - [GrassBlock.cs](Assets/Components/Terrain/Blocks/GrassBlock.cs#L13-L31)
@@ -186,6 +198,14 @@ Block types include stone, grass, mulch, acidic, nest, and container. Each type 
 - [AcidicBlock.cs](Assets/Components/Terrain/Blocks/AcidicBlock.cs#L13-L31)
 - [NestBlock.cs](Assets/Components/Terrain/Blocks/NestBlock.cs#L13-L31)
 - [ContainerBlock.cs](Assets/Components/Terrain/Blocks/ContainerBlock.cs#L10-L31)
+
+#### Ant Colors
+
+Ant colors are set in code when ants are initialized:
+
+- The queen ant is colored yellow: `new Color(0.95f, 0.82f, 0.2f)`.
+- Worker ants are colored brown: `new Color(0.62f, 0.34f, 0.1f)`.
+  This is handled in [AntAgent.cs](Assets/Components/Agents/AntAgent.cs), where the renderer's material color is set based on the ant's role.
 
 ### Procedural Terrain Generation
 
