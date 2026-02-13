@@ -18,7 +18,7 @@ Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images
 > - **Ants:**
 >   - The **queen ant** is colored yellow.
 >   - **Worker ants** are colored brownish orange.
-> - **Block types (by color):**
+> - **Block types:**
 >   - **Acidic block:** Purple
 >   - **Mulch block:** Dark green
 >   - **Nest block:** Red
@@ -33,6 +33,42 @@ Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images
 1. Open the project in Unity 6000.3.\* and load SampleScene.
 2. Press Play.
 3. Watch the HUD for generation, time remaining, living ants, and nest blocks.
+
+#### (Optional) Stream Simulation Metrics to TensorBoard
+
+You can visualize simulation metrics (health, fitness, nest blocks, etc.) in real time using TensorBoard:
+
+1. **Run the simulation**
+
+- Start the Unity scene. Metrics are written to a per-run folder under the Unity persistent data path:
+  `C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics\run_YYYYMMDD_HHMMSS`
+- You should see files like `health_metrics.csv` and `generation_metrics.csv`.
+
+2. **Stream metrics into TensorBoard**
+
+- In a terminal, run one of the following commands (replace `<YourUsername>` with your Windows username):
+
+**Option A: Full paths (run from anywhere)**
+
+```bash
+python "tools/tensorboard_log.py" --metrics-dir "C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs" --follow
+```
+
+**Option B: Run from the project root with a named run**
+
+```bash
+python tools/tensorboard_log.py --metrics-dir "C:\Users\<YourUsername>\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs/run_final" --follow
+```
+
+3. **Launch TensorBoard**
+
+- In another terminal:
+
+```bash
+tensorboard --logdir tb_logs
+```
+
+- Then open: http://localhost:6006/
 
 ### Controls
 
@@ -222,51 +258,3 @@ Simulation metrics (health, fitness, nest blocks, etc.) are logged to CSV files.
 ### UI and Controls
 
 The HUD displays generation, time remaining, living ants, and nest blocks. Camera controls are implemented for fly and rotate modes. UI logic is handled in [UI](Assets/Components/UI).
-
----
-
-## Data Logging & Visualization: TensorBoard Streaming
-
-To help analyze and visualize the simulation's performance and evolutionary progress, Antymology logs key metrics (such as health, fitness, and nest blocks) to CSV files during each run. These metrics can be streamed and visualized in TensorBoard, providing insight into how the colony evolves over time and how changes in configuration or logic affect outcomes.
-
-The logging and streaming workflow is tightly integrated with the technical systems described above. For example, fitness calculations, health changes, and nest block counts are all tracked and exported for review. This allows for both debugging and deeper analysis of the evolutionary algorithm and ant behaviors.
-
-### How to Stream Metrics into TensorBoard
-
-1. **Run the simulation**
-   - Start the Unity scene. Metrics are written to a per-run folder under the Unity persistent data path:
-     C:\Users\Angie\AppData\LocalLow\DefaultCompany\Antymology\metrics\run_YYYYMMDD_HHMMSS
-   - You should see:
-     - `health_metrics.csv`
-     - `generation_metrics.csv`
-
-2. **Stream metrics into TensorBoard**
-   - Choose one of the commands below:
-
-   **Option A: Full paths (run from anywhere)**
-
-   ```bash
-   python "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tools\tensorboard_log.py" --metrics-dir "C:\Users\Angie\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tb_logs" --follow
-   ```
-
-   **Option B: Run from the project root with a named run**
-
-   ```bash
-   python tools\tensorboard_log.py --metrics-dir "C:\Users\Angie\AppData\LocalLow\DefaultCompany\Antymology\metrics" --logdir "tb_logs\run_final" --follow
-   ```
-
-3. **Launch TensorBoard**
-   - In another terminal:
-
-   ```bash
-   tensorboard --logdir "C:\Users\Angie\Downloads\CPSC565-A3-FORK\Antymology\tb_logs"
-   ```
-
-   - Then open: http://localhost:6006/
-
-#### Notes
-
-- If you run TensorBoard from the project root, you can use `tensorboard --logdir tb_logs` instead.
-- The metrics folder keeps a `latest.txt` pointer, so you can pass the root `metrics` folder and it will use the newest run automatically.
-- The run name shows as `.` when logs are written directly into the root logdir; using a subfolder (as in Option B) gives a nicer name.
-- Stop streaming with Ctrl+C.
