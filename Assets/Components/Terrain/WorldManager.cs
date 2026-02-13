@@ -92,7 +92,7 @@ namespace Antymology.Terrain
             }
 
             // AutoUIBootstrapper to ensure UI is created automatically
-            if (GameObject.FindObjectOfType<Antymology.UI.AutoUIBootstrapper>() == null)
+            if (GameObject.FindFirstObjectByType<Antymology.UI.AutoUIBootstrapper>() == null)
             {
                 var uiBootstrapperObj = new GameObject("AutoUIBootstrapper");
                 uiBootstrapperObj.AddComponent<Antymology.UI.AutoUIBootstrapper>();

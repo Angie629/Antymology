@@ -32,7 +32,7 @@ Full-resolution MP4: [Images/Results/Speed Run Video of Assignment 3.mp4](Images
 
 1. Open the project in Unity 6000.3.\* and load SampleScene.
 2. Press Play.
-3. Watch the HUD for generation, time remaining, living ants, and nest blocks.
+3. Watch the HUD for generation, time remaining, living ants, and the current number of nest blocks in the world.
 
 #### (Optional) Stream Simulation Metrics to TensorBoard
 
